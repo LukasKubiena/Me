@@ -947,7 +947,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         async function generateAIResponse(userInput) {
     try {
-        const response = await fetch('https://weather-backend-787v3mu17-lukaskubienas-projects.vercel.app/generate-response', {
+        const response = await fetch('https://backend-fqjm9lxo0-lukaskubienas-projects.vercel.app/api/generate-response', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -977,6 +977,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return "I'm sorry, I couldn't generate a response at this time.";
     }
 }
+
 
         function resetPage() {
             inChatMode = false;
