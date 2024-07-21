@@ -696,56 +696,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 document.addEventListener('DOMContentLoaded', function() {
     if (window.innerWidth <= 1024) {
-        const hey = document.querySelector('.hey');
-        const heyText = hey.querySelector('.hey-text');
-        const comma = hey.querySelector('.comma');
-        const cursor = hey.querySelector('.typing-cursor');
-        const content = document.querySelectorAll('.content, .send-mail');
-
-        // Hide content initially
-        content.forEach(el => el.style.opacity = '0');
-        
-        function typeText(text, element, callback) {
-            let i = 0;
-            element.textContent = ''; // Clear existing text
-            function type() {
-                if (i < text.length) {
-                    element.textContent += text.charAt(i);
-                    i++;
-                    setTimeout(type, 150);
-                } else {
-                    callback();
-                }
-            }
-            type();
-        }
-
-        function showComma() {
-            comma.style.visibility = 'visible';
-            setTimeout(playAnimation, 500);
-        }
-
-        function playAnimation() {
-            hey.classList.add('animate');
-            setTimeout(showContent, 1000);
-        }
-
-        function showContent() {
-            cursor.style.display = 'none';
-            content.forEach(el => {
-                el.style.opacity = '1';
-                el.style.transition = 'opacity 1s ease-in';
-            });
-        }
-
-        // Start the sequence
-        typeText('Hey', heyText, showComma);
-    }
-});
-
-
-document.addEventListener('DOMContentLoaded', function() {
-    if (window.innerWidth <= 1024) {
         let hey = document.querySelector('.hey');
         let heyText = hey.querySelector('.hey-text');
         let comma = hey.querySelector('.comma');
@@ -756,7 +706,6 @@ document.addEventListener('DOMContentLoaded', function() {
         let promptShown = false;
         let inChatMode = false;
         let promptTimer;
-        let blinkInterval;
 
         function showPrompt(text) {
             clearTimeout(promptTimer);
@@ -824,69 +773,63 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         function handleLongPress() {
-    inChatMode = true;
-    playAnimation();
-    
-    clearPreviousContent(true);
-    
-    setTimeout(() => {
-        heyText.textContent = '';
-        comma.style.display = 'none';
-        const input = document.createElement('textarea');
-        input.style.font = window.getComputedStyle(heyText).font;
-        input.style.border = 'none';
-        input.style.background = 'transparent';
-        input.style.outline = 'none';
-        input.style.width = '100%';
-        input.style.resize = 'none';
-        input.style.overflow = 'hidden';
-        input.style.caretColor = 'black'; // Make the cursor visible
-        heyText.appendChild(input);
+            inChatMode = true;
+            playAnimation();
+            
+            clearPreviousContent(true);
+            
+            setTimeout(() => {
+                heyText.textContent = '';
+                comma.style.display = 'none';
+                const input = document.createElement('textarea');
+                input.style.font = window.getComputedStyle(heyText).font;
+                input.style.border = 'none';
+                input.style.background = 'transparent';
+                input.style.outline = 'none';
+                input.style.width = '100%';
+                input.style.resize = 'none';
+                input.style.overflow = 'hidden';
+                input.style.caretColor = 'black'; // Make the cursor visible
+                heyText.appendChild(input);
 
-        // Add blinking cursor style
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes blink-caret {
-                from, to { caret-color: black; }
-                50% { caret-color: transparent; }
-            }
-            textarea {
-                animation: blink-caret 0.75s step-end infinite;
-            }
-        `;
-        document.head.appendChild(style);
+                // Ensure the input field is focused
+                setTimeout(() => {
+                    input.focus();
+                }, 100); // Adjust the delay if necessary
 
-        // Ensure the input field is focused
-        input.focus();
+                // Add blinking cursor style
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes blink-caret {
+                        from, to { caret-color: black; }
+                        50% { caret-color: transparent; }
+                    }
+                    textarea {
+                        animation: blink-caret 0.75s step-end infinite;
+                    }
+                `;
+                document.head.appendChild(style);
 
-        // Try to refocus if the keyboard doesn't appear immediately
-        setTimeout(() => {
-            if (document.activeElement !== input) {
-                input.focus();
-            }
-        }, 500);
+                showPrompt('Tap enter to send');
 
-        showPrompt('Tap enter to send');
+                input.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = this.scrollHeight + 'px';
+                });
 
-        input.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = this.scrollHeight + 'px';
-        });
+                content.forEach(el => el.style.display = 'none');
 
-        content.forEach(el => el.style.display = 'none');
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        const userInput = input.value;
+                        handleUserInput(userInput);
+                    }
+                });
 
-        input.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                const userInput = input.value;
-                handleUserInput(userInput);
-            }
-        });
-
-        addBackButton();
-    }, 500);
-}
-
+                addBackButton();
+            }, 500);
+        }
 
         function clearPreviousContent(keepPrompt = false) {
             const contentContainer = document.querySelector('.content-1').parentNode;
@@ -1009,7 +952,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                 - Part of OpenAI democratic inputs into AI grant winner - Dembrane
                                 - Building digital deliberation systems for AI alignment
 
-                                Concept Feature Designs (08.2022 - 08.2023)
+                                Concept Feature Designs (08.2022 - 
+
+08.2023)
                                 - Benefited from ADPList mentor sessions with Takahiro Kawaguchi, Director of UX Design at Reddit
                                 - Developed high-fidelity designs and prototypes
                                 - Case study concepts include a mixed reality note-taking software, daily tasks structuring application, and online service booking tool
@@ -1076,7 +1021,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             messages = [];
         }
-
 
         function playAnimation() {
             hey.classList.remove('animate');
