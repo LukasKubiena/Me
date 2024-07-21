@@ -8,7 +8,7 @@ app.use(express.json());
 
 // Use CORS middleware and allow requests from your frontend domain
 app.use(cors({
-    origin: 'www.lukaskubiena.com', // Your frontend domain
+    origin: 'http://www.lukaskubiena.com', // Your frontend domain
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
     optionsSuccessStatus: 204
