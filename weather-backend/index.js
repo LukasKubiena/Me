@@ -5,7 +5,11 @@ require('dotenv').config();
 
 const app = express();
 app.use(express.json());
-app.use(cors()); // Use CORS middleware
+
+// Use CORS middleware and allow requests from your frontend domain
+app.use(cors({
+    origin: 'http://www.lukaskubiena.com' // Your frontend domain
+}));
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
@@ -32,3 +36,4 @@ app.post('/generate-response', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
