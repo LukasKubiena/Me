@@ -756,6 +756,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let promptShown = false;
         let inChatMode = false;
         let promptTimer;
+        let blinkInterval;
 
         function showPrompt(text) {
             clearTimeout(promptTimer);
@@ -823,59 +824,69 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         function handleLongPress() {
-            inChatMode = true;
-            playAnimation();
-            
-            clearPreviousContent(true);
-            
-            setTimeout(() => {
-                heyText.textContent = '';
-                comma.style.display = 'none';
-                const input = document.createElement('textarea');
-                input.style.font = window.getComputedStyle(heyText).font;
-                input.style.border = 'none';
-                input.style.background = 'transparent';
-                input.style.outline = 'none';
-                input.style.width = '100%';
-                input.style.resize = 'none';
-                input.style.overflow = 'hidden';
-                input.style.caretColor = 'black'; // Make the cursor visible
-                heyText.appendChild(input);
-                input.focus(); // Ensure the input field is focused immediately
+    inChatMode = true;
+    playAnimation();
+    
+    clearPreviousContent(true);
+    
+    setTimeout(() => {
+        heyText.textContent = '';
+        comma.style.display = 'none';
+        const input = document.createElement('textarea');
+        input.style.font = window.getComputedStyle(heyText).font;
+        input.style.border = 'none';
+        input.style.background = 'transparent';
+        input.style.outline = 'none';
+        input.style.width = '100%';
+        input.style.resize = 'none';
+        input.style.overflow = 'hidden';
+        input.style.caretColor = 'black'; // Make the cursor visible
+        heyText.appendChild(input);
 
-                // Add blinking cursor style
-                const style = document.createElement('style');
-                style.textContent = `
-                    @keyframes blink-caret {
-                        from, to { caret-color: black; }
-                        50% { caret-color: transparent; }
-                    }
-                    textarea {
-                        animation: blink-caret 0.75s step-end infinite;
-                    }
-                `;
-                document.head.appendChild(style);
+        // Add blinking cursor style
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes blink-caret {
+                from, to { caret-color: black; }
+                50% { caret-color: transparent; }
+            }
+            textarea {
+                animation: blink-caret 0.75s step-end infinite;
+            }
+        `;
+        document.head.appendChild(style);
 
-                showPrompt('Tap enter to send');
+        // Ensure the input field is focused
+        input.focus();
 
-                input.addEventListener('input', function() {
-                    this.style.height = 'auto';
-                    this.style.height = this.scrollHeight + 'px';
-                });
+        // Try to refocus if the keyboard doesn't appear immediately
+        setTimeout(() => {
+            if (document.activeElement !== input) {
+                input.focus();
+            }
+        }, 500);
 
-                content.forEach(el => el.style.display = 'none');
+        showPrompt('Tap enter to send');
 
-                input.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        const userInput = input.value;
-                        handleUserInput(userInput);
-                    }
-                });
+        input.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
 
-                addBackButton();
-            }, 500);
-        }
+        content.forEach(el => el.style.display = 'none');
+
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const userInput = input.value;
+                handleUserInput(userInput);
+            }
+        });
+
+        addBackButton();
+    }, 500);
+}
+
 
         function clearPreviousContent(keepPrompt = false) {
             const contentContainer = document.querySelector('.content-1').parentNode;
@@ -995,9 +1006,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                                 Dembrane Design Internship (01.2024 - Now)
                                 - Turning requirements analysis and process diagrams into intuitive UX flows and functional UI patterns
-                                - Part of OpenAI democratic inputs
-
- into AI grant winner - Dembrane
+                                - Part of OpenAI democratic inputs into AI grant winner - Dembrane
                                 - Building digital deliberation systems for AI alignment
 
                                 Concept Feature Designs (08.2022 - 08.2023)
@@ -1067,6 +1076,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             messages = [];
         }
+
 
         function playAnimation() {
             hey.classList.remove('animate');
