@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lukas M. Kubiena</title>
+    <title>Lukas Kubiena</title>
     <style>
         @font-face {
             font-family: 'NeueHaasDisplay-Light';
@@ -363,38 +363,84 @@
 
         
         @media screen and (max-width: 1024px) {
-            body {
-                display: flex;
-                flex-direction: column;
-                padding: 40px;
-                margin-top: 12vh;
-                box-sizing: border-box;
-            }
+    body {
+        display: flex;
+        flex-direction: column;
+        padding: 40px;
+        margin-top: 12vh;
+        box-sizing: border-box;
+    }
 
-            .hey, .content, .send-mail {
-                width: 100%;
-                margin-left: 0;
-                padding-left: 0;
-            }
+    .hey, .content, .send-mail {
+        width: 100%;
+        margin-left: 0;
+        padding-left: 0;
+    }
 
-            .hey {
-                font-size: 36px;
-                margin-bottom: 20px;
-                text-align: left;
-            }
+    .hey-container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
 
-            .content, .send-mail {
-                font-size: 18px;
-                line-height: 1.5;
-                margin-bottom: 20px;
-                text-align: left;
-            }
+    .prompt {
+        color: #888;
+        font-size: 16px;
+        margin-bottom: 24px;
+        align-self: flex-start;
+    }
 
-            /* Hide elements not needed on mobile */
-            header, .side-group, ._24, .personal-website, .project-row, .project-image-container, .project-row-right, .project-image-container-2, .project-info, .project-paragraph-2, .copyright {
-                display: none;
-            }
-        }
+    .hey {
+        font-size: 36px;
+        text-align: left;
+        opacity: 1;
+        transition: transform 0.5s ease-out;
+    }
+
+    .typing-cursor {
+        display: inline-block;
+        width: 1px;
+        height: 0.7em; /* Adjust to match text height */
+        background-color: #000;
+        animation: blink 0.7s infinite;
+        margin-left: 2px;
+        vertical-align: baseline; /* Align with text baseline */
+    }
+
+
+    /* Adjust the space between user input and AI output */
+    .user-input,
+    .ai-output {
+        margin-top: 4px; /* Reduce the space */
+        margin-bottom: 4px; /* Reduce the space */
+    }
+
+    .content, .send-mail {
+        font-size: 18px;
+        line-height: 1.5;
+        margin-bottom: 20px;
+        text-align: left;
+        opacity: 0;
+        transition: opacity 1s ease-in;
+    }
+
+
+    .content.visible, .send-mail.visible {
+        opacity: 1;
+    }
+
+
+    @keyframes blink {
+        0% { opacity: 0; }
+        50% { opacity: 1; }
+        100% { opacity: 0; }
+    }
+
+    /* Hide elements not needed on mobile */
+    header, .side-group, ._24, .personal-website, .project-row, .project-image-container, .project-row-right, .project-image-container-2, .project-info, .project-paragraph-2, .copyright {
+        display: none;
+    }
+}
     </style>
 </head>
 <body>
@@ -405,7 +451,11 @@
             <a href="#projects" class="contact">Projects</a>
         </div>
     </header>
-    <div class="hey"><span class="hey-text">Hey</span><span class="comma">,</span></div>
+    <div class="hey-container">
+        <div class="hey">
+            <span class="hey-text"></span><span class="comma">,</span><span class="typing-cursor"></span>
+        </div>
+    </div>
     <div class="content content-1">
         I'm Lukas. I work on building useful interactions between Humans and AI <a href="https://www.dembrane.com" class="at-link">@Dembrane</a>. We streamline the process of capturing insights from multiple conversations and transforming them into a structured, interactive, and evolving knowledge base.
     </div>
@@ -643,6 +693,409 @@ document.addEventListener('DOMContentLoaded', function() {
         window.addEventListener('devicemotion', handleShake);
     }
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.innerWidth <= 1024) {
+        const hey = document.querySelector('.hey');
+        const heyText = hey.querySelector('.hey-text');
+        const comma = hey.querySelector('.comma');
+        const cursor = hey.querySelector('.typing-cursor');
+        const content = document.querySelectorAll('.content, .send-mail');
+
+        // Hide content initially
+        content.forEach(el => el.style.opacity = '0');
+        
+        function typeText(text, element, callback) {
+            let i = 0;
+            element.textContent = ''; // Clear existing text
+            function type() {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(type, 150);
+                } else {
+                    callback();
+                }
+            }
+            type();
+        }
+
+        function showComma() {
+            comma.style.visibility = 'visible';
+            setTimeout(playAnimation, 500);
+        }
+
+        function playAnimation() {
+            hey.classList.add('animate');
+            setTimeout(showContent, 1000);
+        }
+
+        function showContent() {
+            cursor.style.display = 'none';
+            content.forEach(el => {
+                el.style.opacity = '1';
+                el.style.transition = 'opacity 1s ease-in';
+            });
+        }
+
+        // Start the sequence
+        typeText('Hey', heyText, showComma);
+    }
+});
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.innerWidth <= 1024) {
+        let hey = document.querySelector('.hey');
+        let heyText = hey.querySelector('.hey-text');
+        let comma = hey.querySelector('.comma');
+        const content = document.querySelectorAll('.content, .send-mail');
+        let longPressTimer;
+        let isLongPress = false;
+        let messages = [];
+        let promptShown = false;
+        let inChatMode = false;
+        let promptTimer;
+        let blinkInterval;
+
+        function showPrompt(text) {
+            clearTimeout(promptTimer);
+            if (!promptShown) {
+                const promptContainer = document.createElement('div');
+                promptContainer.className = 'prompt';
+                promptContainer.textContent = text;
+                promptContainer.style.opacity = '0';
+                promptContainer.style.transition = 'opacity 0.5s ease-in';
+                
+                const heyContainer = document.querySelector('.hey-container');
+                heyContainer.insertBefore(promptContainer, heyContainer.firstChild);
+                
+                setTimeout(() => {
+                    promptContainer.style.opacity = '1';
+                }, 10);
+                
+                promptShown = true;
+            } else {
+                const promptContainer = document.querySelector('.prompt');
+                if (promptContainer) {
+                    promptContainer.style.opacity = '0';
+                    setTimeout(() => {
+                        promptContainer.textContent = text;
+                        promptContainer.style.opacity = '1';
+                    }, 500);
+                }
+            }
+        }
+        
+        function hidePrompt() {
+            const promptContainer = document.querySelector('.prompt');
+            if (promptContainer) {
+                promptContainer.style.opacity = '0';
+                promptContainer.style.transition = 'opacity 0.3s ease-out';
+                setTimeout(() => {
+                    promptContainer.remove();
+                    promptShown = false;
+                }, 300);
+            }
+        }
+
+        function resetPromptTimer() {
+            clearTimeout(promptTimer);
+            promptTimer = setTimeout(() => {
+                if (!inChatMode) showPrompt('Press this to ask about me');
+            }, 10000);
+        }
+
+        resetPromptTimer();
+
+        hey.addEventListener('touchstart', function(e) {
+            isLongPress = false;
+            longPressTimer = setTimeout(() => {
+                isLongPress = true;
+                handleLongPress();
+            }, 250);
+        });
+
+        hey.addEventListener('touchend', function(e) {
+            clearTimeout(longPressTimer);
+            if (!isLongPress) {
+                playAnimation();
+            }
+        });
+
+        function handleLongPress() {
+            inChatMode = true;
+            playAnimation();
+            
+            clearPreviousContent(true);
+            
+            setTimeout(() => {
+                heyText.textContent = '';
+                comma.style.display = 'none';
+                const input = document.createElement('textarea');
+                input.style.font = window.getComputedStyle(heyText).font;
+                input.style.border = 'none';
+                input.style.background = 'transparent';
+                input.style.outline = 'none';
+                input.style.width = '100%';
+                input.style.resize = 'none';
+                input.style.overflow = 'hidden';
+                input.style.caretColor = 'black'; // Make the cursor visible
+                heyText.appendChild(input);
+                input.focus();
+
+                // Add blinking cursor style
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes blink-caret {
+                        from, to { caret-color: black; }
+                        50% { caret-color: transparent; }
+                    }
+                    textarea {
+                        animation: blink-caret 0.75s step-end infinite;
+                    }
+                `;
+                document.head.appendChild(style);
+
+                showPrompt('Tap enter to send');
+
+                input.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = this.scrollHeight + 'px';
+                });
+
+                content.forEach(el => el.style.display = 'none');
+
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        const userInput = input.value;
+                        handleUserInput(userInput);
+                    }
+                });
+
+                addBackButton();
+            }, 500);
+        }
+
+        function clearPreviousContent(keepPrompt = false) {
+            const contentContainer = document.querySelector('.content-1').parentNode;
+            const previousResponse = contentContainer.querySelector('div[style*="text-align: justify"]');
+            if (previousResponse) previousResponse.remove();
+            const existingBackButton = contentContainer.querySelector('a[style*="text-decoration: underline"]');
+            if (existingBackButton) existingBackButton.remove();
+            if (!keepPrompt) {
+                hidePrompt();
+            }
+        }
+
+        function addBackButton() {
+            const existingBackButton = document.querySelector('a[style*="text-decoration: underline"]');
+            if (existingBackButton) existingBackButton.remove();
+
+            const backButton = document.createElement('a');
+            backButton.textContent = 'back';
+            backButton.style.textDecoration = 'underline';
+            backButton.style.display = 'block';
+            backButton.style.marginTop = '20px';
+            backButton.style.fontFamily = window.getComputedStyle(content[0]).fontFamily;
+            backButton.style.fontSize = window.getComputedStyle(content[0]).fontSize;
+            
+            backButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                resetPage();
+            });
+            
+            const contentContainer = document.querySelector('.content-1').parentNode;
+            contentContainer.appendChild(backButton);
+        }
+
+        async function handleUserInput(userInput) {
+            heyText.textContent = userInput;
+            heyText.style.whiteSpace = 'pre-wrap';
+            heyText.style.wordBreak = 'break-word';
+            
+            showPrompt('Tap again for new question');
+
+            const aiResponse = await generateAIResponse(userInput);
+            
+            const contentContainer = document.querySelector('.content-1').parentNode;
+            
+            // Remove previous response and back button if they exist, but keep the prompt
+            clearPreviousContent(true);
+
+            const responseElement = document.createElement('div');
+            responseElement.style.fontFamily = window.getComputedStyle(content[0]).fontFamily;
+            responseElement.style.fontSize = window.getComputedStyle(content[0]).fontSize;
+            responseElement.style.marginTop = '10px';
+            responseElement.style.textAlign = 'justify';
+            
+            contentContainer.appendChild(responseElement);
+
+            const words = aiResponse.split(' ');
+            let i = 0;
+            const intervalId = setInterval(() => {
+                if (i < words.length) {
+                    responseElement.textContent += words[i] + ' ';
+                    i++;
+                } else {
+                    clearInterval(intervalId);
+                    addBackButton(); // Add back button after response is fully displayed
+                }
+            }, 120);
+        }
+
+        async function generateAIResponse(userInput) {
+            messages.push({ "role": "user", "content": userInput });
+
+            try {
+                const response = await fetch('https://vercel.com/lukaskubienas-projects/weather-backend', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        messages: [
+                            {
+                                "role": "system",
+                                "content": `You are an AI that represents Lukas Kubiena neutrally in a nice and calm tone. You have the following context about Lukas Kubiena:
+
+                                Lukas Kubiena
+
+                                Education
+
+                                Albertus Magnus Private School
+                                - Austrian high-school diploma: "Excellent Success"
+                                - Graduated with 1.0 average in Mathematics, English, German, and Descriptive Geometry
+                                - Pre-scientific thesis: "Autonomous driving with a special focus on the car manufacturer Tesla"
+
+                                Aarhus University
+                                - Cognitive Science, BA (2023 - Now)
+                                - Comprehensive program encompassing linguistics, biology, anthropology, computational neuroscience, and artificial intelligence
+                                - Practical skills in programming (R and Python), statistical modeling, and empirical research design
+                                - Courses: "Introduction to Experimental Methods, Statistics, and Programming"
+                                - Focus on Data Analysis and applied cognitive science
+
+                                Experience
+
+                                Leading Student Representative (11.2020 - 05.2021)
+                                - Initiated a school-wide tutoring system, benefiting 900+ students
+                                - Served as liaison between students and the SGA during Covid
+                                - Led surveys on students' workload and well-being, presented findings to school leaders
+                                - Championed a vertical greening system for classrooms
+
+                                Paramedic for St. Johns Accident Assistance (10.2021 - 05.2022)
+                                - Passed the emergency paramedic exam with honors
+                                - Worked in ambulance services, city-wide vaccination and covid test centers, and a refugee daycare for Ukrainian refugees
+
+                                Kwizda Agro GmbH (07.2018 - 08.2018)
+                                - Intern in engineering and maintenance
+                                - Tasks included restoring complex pipe nozzles and general repairs in storage facilities
+
+                                Dembrane Design Internship (01.2024 - Now)
+                                - Turning requirements analysis and process diagrams into intuitive UX flows and functional UI patterns
+                                - Part of OpenAI democratic inputs into AI grant winner - Dembrane
+                                - Building digital deliberation systems for AI alignment
+
+                                Concept Feature Designs (08.2022 - 08.2023)
+                                - Benefited from ADPList mentor sessions with Takahiro Kawaguchi, Director of UX Design at Reddit
+                                - Developed high-fidelity designs and prototypes
+                                - Case study concepts include a mixed reality note-taking software, daily tasks structuring application, and online service booking tool
+
+                                Skills
+
+                                Languages
+                                - German - native
+                                - English - fluent, professional working proficiency (TOEFL iBT 119/120)
+
+                                Technical Skills
+                                - R Studio, Python, Figma, MicroStation CAD Software, Pixelmator, Adobe Suite, HTML & CSS, JavaScript & basic R3f, Autodesk Fusion 360
+
+                                Contact
+                                - Email: lukasmariakubiena@gmail.com
+                                - LinkedIn: www.linkedin.com/in/lukas-kubiena
+                                - Phone: +43 681 10599780`
+                            },
+                            ...messages
+                        ],
+                        max_tokens: 150,
+                        temperature: 0.7
+                    })
+                });
+
+                const data = await response.json();
+                const aiResponse = data.choices[0].message.content.trim();
+                messages.push({ "role": "assistant", "content": aiResponse });
+                return aiResponse;
+            } catch (error) {
+                console.error('Error:', error);
+                return "I'm sorry, I couldn't generate a response at this time.";
+            }
+        }
+
+        function resetPage() {
+            inChatMode = false;
+            
+            // Immediately hide the prompt and system message
+            hidePrompt();
+            const systemMessage = document.querySelector('.system-message');
+            if (systemMessage) systemMessage.remove();
+
+            // Clear previous content
+            clearPreviousContent();
+
+            // Reset the Hey container
+            hey.innerHTML = '<span class="hey-text">Hey</span><span class="comma">,</span>';
+            heyText = hey.querySelector('.hey-text');
+            comma = hey.querySelector('.comma');
+
+            content.forEach(el => {
+                el.style.display = 'block';
+                el.style.opacity = '1';
+            });
+
+            // Ensure animations play after content is updated
+            setTimeout(() => {
+                playAnimation();
+                playCommaAnimation();
+            }, 10);
+
+            resetPromptTimer();
+
+            messages = [];
+        }
+
+
+        function playAnimation() {
+            hey.classList.remove('animate');
+            void hey.offsetWidth;
+            hey.classList.add('animate');
+        }
+
+        function playCommaAnimation() {
+            comma.style.animation = 'none';
+            void comma.offsetWidth; // Trigger reflow
+            comma.style.animation = 'bellJingle 0.8s ease-in-out';
+        }
+
+        hey.addEventListener('touchstart', function(e) {
+            isLongPress = false;
+            longPressTimer = setTimeout(() => {
+                isLongPress = true;
+                handleLongPress();
+            }, 250);
+        });
+
+        hey.addEventListener('touchend', function(e) {
+            clearTimeout(longPressTimer);
+            if (!isLongPress && !inChatMode) {
+                playAnimation();
+                playCommaAnimation();
+            }
+        });
+    }
+});
+
     </script>
 </body>
 </html>
