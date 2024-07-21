@@ -696,6 +696,56 @@ document.addEventListener('DOMContentLoaded', function() {
 
 document.addEventListener('DOMContentLoaded', function() {
     if (window.innerWidth <= 1024) {
+        const hey = document.querySelector('.hey');
+        const heyText = hey.querySelector('.hey-text');
+        const comma = hey.querySelector('.comma');
+        const cursor = hey.querySelector('.typing-cursor');
+        const content = document.querySelectorAll('.content, .send-mail');
+
+        // Hide content initially
+        content.forEach(el => el.style.opacity = '0');
+        
+        function typeText(text, element, callback) {
+            let i = 0;
+            element.textContent = ''; // Clear existing text
+            function type() {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(type, 150);
+                } else {
+                    callback();
+                }
+            }
+            type();
+        }
+
+        function showComma() {
+            comma.style.visibility = 'visible';
+            setTimeout(playAnimation, 500);
+        }
+
+        function playAnimation() {
+            hey.classList.add('animate');
+            setTimeout(showContent, 1000);
+        }
+
+        function showContent() {
+            cursor.style.display = 'none';
+            content.forEach(el => {
+                el.style.opacity = '1';
+                el.style.transition = 'opacity 1s ease-in';
+            });
+        }
+
+        // Start the sequence
+        typeText('Hey', heyText, showComma);
+    }
+});
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.innerWidth <= 1024) {
         let hey = document.querySelector('.hey');
         let heyText = hey.querySelector('.hey-text');
         let comma = hey.querySelector('.comma');
@@ -793,9 +843,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 heyText.appendChild(input);
 
                 // Ensure the input field is focused
-                setTimeout(() => {
+                requestAnimationFrame(() => {
                     input.focus();
-                }, 100); // Adjust the delay if necessary
+                });
 
                 // Add blinking cursor style
                 const style = document.createElement('style');
@@ -952,9 +1002,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                 - Part of OpenAI democratic inputs into AI grant winner - Dembrane
                                 - Building digital deliberation systems for AI alignment
 
-                                Concept Feature Designs (08.2022 - 
+                               
 
-08.2023)
+ Concept Feature Designs (08.2022 - 08.2023)
                                 - Benefited from ADPList mentor sessions with Takahiro Kawaguchi, Director of UX Design at Reddit
                                 - Developed high-fidelity designs and prototypes
                                 - Case study concepts include a mixed reality note-taking software, daily tasks structuring application, and online service booking tool
