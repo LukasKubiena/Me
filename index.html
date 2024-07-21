@@ -756,7 +756,6 @@ document.addEventListener('DOMContentLoaded', function() {
         let promptShown = false;
         let inChatMode = false;
         let promptTimer;
-        let blinkInterval;
 
         function showPrompt(text) {
             clearTimeout(promptTimer);
@@ -842,7 +841,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 input.style.overflow = 'hidden';
                 input.style.caretColor = 'black'; // Make the cursor visible
                 heyText.appendChild(input);
-                input.focus();
+                input.focus(); // Ensure the input field is focused immediately
 
                 // Add blinking cursor style
                 const style = document.createElement('style');
@@ -996,7 +995,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
                                 Dembrane Design Internship (01.2024 - Now)
                                 - Turning requirements analysis and process diagrams into intuitive UX flows and functional UI patterns
-                                - Part of OpenAI democratic inputs into AI grant winner - Dembrane
+                                - Part of OpenAI democratic inputs
+
+ into AI grant winner - Dembrane
                                 - Building digital deliberation systems for AI alignment
 
                                 Concept Feature Designs (08.2022 - 08.2023)
@@ -1066,7 +1067,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             messages = [];
         }
-
 
         function playAnimation() {
             hey.classList.remove('animate');
